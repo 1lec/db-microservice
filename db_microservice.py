@@ -73,16 +73,13 @@ class DatabaseManager:
             request_type = request["type"]
 
             if request_type == "game":
+                self.add_player(request["name"])
                 player_id = self.get_player_id(request["name"])
-                if player_id:
+                try:
                     self.add_game(player_id, request["result"])
                     self.socket.send_string("Result was successfully saved.")
-                else:
+                except:
                     self.socket.send_string("Failed to save game result.")
-
-            if request_type == "player":
-                self.add_player(request["name"])
-                self.socket.send_string("Successfully added player!")
 
         self.connection.close()
 

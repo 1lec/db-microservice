@@ -6,9 +6,6 @@ def main():
     socket = context.socket(zmq.REQ)
     socket.connect("tcp://localhost:5557")
 
-    socket.send_json({"type": "player", "name": "Alec"})
-    print(socket.recv().decode())
-
     socket.send_json({"type": "game", "name": "Alec", "result": 1})
     print(socket.recv().decode())
 
