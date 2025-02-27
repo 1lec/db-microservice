@@ -29,27 +29,36 @@ class DatabaseManager:
         socket.bind(f"tcp://*:{port}")
         return socket
     
-    def add_player(name):
+    def add_player(self, name):
         """Receives a string representing the name of a player and enters the player into the database."""
-        player = None
+        add_player = """
+        INSERT INTO Players (name) VALUES (
+        ?
+        );
+        """
+        self.cursor.execute(add_player, (name,))
+        self.connection.commit()
 
     def add_game(self, playerID, result):
-        game = f"""
-        INSERT INTO Games (playerID, result) VALUES(
+        add_game = """
+        INSERT INTO Games (playerID, result) VALUES (
         ?,
         ?
         );
         """
-        self.cursor.execute(game, (playerID, result))
+        self.cursor.execute(add_game, (playerID, result))
         self.connection.commit()
 
     def listen(self):
         while True:
             request = self.socket.recv_json()
             request_type = request["type"]
-            if request_type == "add":
+            if request_type == "game":
                 self.add_game(request["playerID"], request["result"])
-                self.socket.send_string("Successfully added row!")
+                self.socket.send_string("Successfully added game!")
+            if request_type == "player":
+                self.add_player(request["name"])
+                self.socket.send_string("Successfully added player!")
 
         self.connection.close()
 
