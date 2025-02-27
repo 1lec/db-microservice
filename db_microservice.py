@@ -28,15 +28,19 @@ class DatabaseManager:
         socket = context.socket(zmq.REP)
         socket.bind(f"tcp://*:{port}")
         return socket
+    
+    def add_player(name):
+        """Receives a string representing the name of a player and enters the player into the database."""
+        player = None
 
     def add_game(self, playerID, result):
         game = f"""
         INSERT INTO Games (playerID, result) VALUES(
-        {playerID},
-        {result}
+        ?,
+        ?
         );
         """
-        self.cursor.execute(game)
+        self.cursor.execute(game, (playerID, result))
         self.connection.commit()
 
     def listen(self):
