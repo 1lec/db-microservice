@@ -29,24 +29,36 @@ class DatabaseManager:
         socket.bind(f"tcp://*:{port}")
         return socket
     
+    def get_player_id(self, name):
+        """Receives a string representing the name of a player and returns the playerID, or returns None if the player
+        is not in the database."""
+        query = """
+        SELECT playerID FROM Players
+        WHERE name=?;
+        """
+        self.cursor.execute(query, (name,))
+        result = self.cursor.fetchone()
+        if result:
+            return result[0]
+    
     def add_player(self, name):
         """Receives a string representing the name of a player and enters the player into the database."""
-        add_player = """
+        query = """
         INSERT INTO Players (name) VALUES (
         ?
         );
         """
-        self.cursor.execute(add_player, (name,))
+        self.cursor.execute(query, (name,))
         self.connection.commit()
 
     def add_game(self, playerID, result):
-        add_game = """
+        query = """
         INSERT INTO Games (playerID, result) VALUES (
         ?,
         ?
         );
         """
-        self.cursor.execute(add_game, (playerID, result))
+        self.cursor.execute(query, (playerID, result))
         self.connection.commit()
 
     def listen(self):
@@ -59,6 +71,9 @@ class DatabaseManager:
             if request_type == "player":
                 self.add_player(request["name"])
                 self.socket.send_string("Successfully added player!")
+            if request_type == "get_id":
+                player_id = self.get_player_id(request["name"])
+                self.socket.send_json({"player_id": player_id})
 
         self.connection.close()
 
