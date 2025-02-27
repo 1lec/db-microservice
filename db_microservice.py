@@ -65,15 +65,18 @@ class DatabaseManager:
         while True:
             request = self.socket.recv_json()
             request_type = request["type"]
+
             if request_type == "game":
-                self.add_game(request["playerID"], request["result"])
-                self.socket.send_string("Successfully added game!")
+                player_id = self.get_player_id(request["name"])
+                if player_id:
+                    self.add_game(player_id, request["result"])
+                    self.socket.send_string("Result was successfully saved.")
+                else:
+                    self.socket.send_string("Failed to save game result.")
+
             if request_type == "player":
                 self.add_player(request["name"])
                 self.socket.send_string("Successfully added player!")
-            if request_type == "get_id":
-                player_id = self.get_player_id(request["name"])
-                self.socket.send_json({"player_id": player_id})
 
         self.connection.close()
 
