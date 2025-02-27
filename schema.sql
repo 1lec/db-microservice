@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS Games (
 
 CREATE TABLE IF NOT EXISTS Players (
     playerID    INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL
+    name        TEXT    NOT NULL    UNIQUE
 );

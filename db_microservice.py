@@ -42,7 +42,13 @@ class DatabaseManager:
             return result[0]
     
     def add_player(self, name):
-        """Receives a string representing the name of a player and enters the player into the database."""
+        """Receives a string representing the name of a player, and if the name is not already in the
+        database, adds the name to the database."""
+        # Verify name is not in the database
+        if self.get_player_id(name): 
+            return
+        
+        # Add name if not found in database
         query = """
         INSERT INTO Players (name) VALUES (
         ?
