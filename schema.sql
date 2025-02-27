@@ -1,5 +1,11 @@
 CREATE TABLE IF NOT EXISTS Games (
     gameID      INTEGER PRIMARY KEY AUTOINCREMENT,
-    playerID    INTEGER,
-    result      INTEGER
+    playerID    INTEGER NOT NULL,
+    result      INTEGER NOT NULL,
+    FOREIGN KEY(playerID) REFERENCES Players(playerID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Players (
+    playerID    INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT    NOT NULL
 );
