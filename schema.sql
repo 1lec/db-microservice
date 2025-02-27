@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS Games (
-    gameID      INT,
-    playerID    INT,
-    result      INT
+    gameID      INTEGER PRIMARY KEY AUTOINCREMENT,
+    playerID    INTEGER,
+    result      INTEGER
 );

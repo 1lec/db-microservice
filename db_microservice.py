@@ -29,10 +29,9 @@ class DatabaseManager:
         socket.bind(f"tcp://*:{port}")
         return socket
 
-    def add_game(self, gameID, playerID, result):
+    def add_game(self, playerID, result):
         game = f"""
-        INSERT INTO Games VALUES(
-        {gameID},
+        INSERT INTO Games (playerID, result) VALUES(
         {playerID},
         {result}
         );
@@ -45,7 +44,7 @@ class DatabaseManager:
             request = self.socket.recv_json()
             request_type = request["type"]
             if request_type == "add":
-                self.add_game(request["gameID"], request["playerID"], request["result"])
+                self.add_game(request["playerID"], request["result"])
                 self.socket.send_string("Successfully added row!")
 
         self.connection.close()
