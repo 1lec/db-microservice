@@ -30,6 +30,34 @@ class DatabaseManager:
         socket.bind(f"tcp://*:{port}")
         return socket
     
+    def listen(self):
+        """Continuously waits for, then handles requests from the client."""
+        while True:
+            request = self.socket.recv_json()
+            request_type = request["type"]
+
+            if request_type == "game":
+                self.insert_game(request)
+            if request_type == "delete":
+                self.delete_player(request["name"])
+                self.socket.send_string(f"Successfully deleted {request["name"]}.")
+            if request_type == "delete-all":
+                try:
+                    self.delete_all_players()
+                    self.socket.send_string("Successfully deleted all names.")
+                except:
+                    self.socket.send_string("Failed to delete all names.")
+            if request_type == "player":
+                player_id = self.get_player_id(request["name"])
+                if player_id:
+                    games = self.get_games(player_id)
+                    response = {"status": "success", "games": games}
+                else:
+                    response = {"status": "failure", "message": f"There were no games found for {request["name"]}."}
+                self.socket.send_json(response)
+
+        self.connection.close()
+    
     def get_player_id(self, name):
         """Receives a string representing the name of a player and returns the playerID, or returns None if the player
         is not in the database."""
@@ -76,15 +104,23 @@ class DatabaseManager:
         self.cursor.execute(query)
         self.connection.commit()
 
-    def add_game(self, playerID, result):
-        query = """
-        INSERT INTO Games (playerID, result) VALUES (
-        ?,
-        ?
-        );
-        """
-        self.cursor.execute(query, (playerID, result))
-        self.connection.commit()
+    def insert_game(self, request):
+        """Receives a request to insert a game into the database, adds the player to the database if needed,
+        then inserts the game into the database."""
+        self.add_player(request["name"])
+        player_id = self.get_player_id(request["name"])
+        try:
+            query = """
+            INSERT INTO Games (playerID, result) VALUES (
+            ?,
+            ?
+            );
+            """
+            self.cursor.execute(query, (player_id, request["result"]))
+            self.connection.commit()
+            self.socket.send_string("Result was successfully saved.")
+        except:
+            self.socket.send_string("Failed to save game result.")
 
     def get_games(self, playerID):
         """Received a playerID and returns all games for that player."""
@@ -97,39 +133,6 @@ class DatabaseManager:
         game_tuples = self.cursor.fetchall()
         game_lists = [list(game_tuple) for game_tuple in game_tuples]
         return game_lists
-
-    def listen(self):
-        while True:
-            request = self.socket.recv_json()
-            request_type = request["type"]
-
-            if request_type == "game":
-                self.add_player(request["name"])
-                player_id = self.get_player_id(request["name"])
-                try:
-                    self.add_game(player_id, request["result"])
-                    self.socket.send_string("Result was successfully saved.")
-                except:
-                    self.socket.send_string("Failed to save game result.")
-            if request_type == "delete":
-                self.delete_player(request["name"])
-                self.socket.send_string(f"Successfully deleted {request["name"]}.")
-            if request_type == "delete-all":
-                try:
-                    self.delete_all_players()
-                    self.socket.send_string("Successfully deleted all names.")
-                except:
-                    self.socket.send_string("Failed to delete all names.")
-            if request_type == "player":
-                player_id = self.get_player_id(request["name"])
-                if player_id:
-                    games = self.get_games(player_id)
-                    response = {"status": "success", "games": games}
-                else:
-                    response = {"status": "failure", "message": f"There were no games found for {request["name"]}."}
-                self.socket.send_json(response)
-
-        self.connection.close()
 
 
 def main():
