@@ -11,6 +11,7 @@ class DatabaseManager:
     """Handles all client requests and interacts with the database."""
     def __init__(self):
         self.connection = sqlite3.connect(DATABASE_FILE)
+        self.connection.execute("PRAGMA foreign_keys = ON;")  # Enable foreign key constraints
         self.cursor = self.connection.cursor()
         self.socket = self.zmq_connect(ZMQ_PORT)
         self.upload_schema()
