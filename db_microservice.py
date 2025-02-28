@@ -94,8 +94,9 @@ class DatabaseManager:
         WHERE Games.playerID = ?;
         """
         self.cursor.execute(query, (playerID,))
-        games = self.cursor.fetchall()
-        return games
+        game_tuples = self.cursor.fetchall()
+        game_lists = [list(game_tuple) for game_tuple in game_tuples]
+        return game_lists
 
     def listen(self):
         while True:
