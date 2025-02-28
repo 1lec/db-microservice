@@ -20,12 +20,17 @@ def get_games(socket, name):
     else:
         print(response["message"])
 
+def get_all_games(socket):
+    socket.send_json({"type": "all-players"})
+    response = socket.recv_json()
+    print(response)
+
 
 def main():
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
     socket.connect("tcp://localhost:5557")
-    
+
 
 if __name__ == "__main__":
     main()

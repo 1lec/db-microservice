@@ -55,6 +55,9 @@ class DatabaseManager:
                 else:
                     response = {"status": "failure", "message": f"There were no games found for {request["name"]}."}
                 self.socket.send_json(response)
+            if request_type == "all-players":
+                response = self.get_all_games()
+                self.socket.send_json(response)
 
         self.connection.close()
     
@@ -133,6 +136,18 @@ class DatabaseManager:
         game_tuples = self.cursor.fetchall()
         game_lists = [list(game_tuple) for game_tuple in game_tuples]
         return game_lists
+    
+    def get_all_games(self):
+        """Retrieves all games present in the database."""
+        query = """
+        SELECT Players.name, Games.result FROM Games
+        INNER JOIN Players ON Games.playerID=Players.playerID
+        """
+        self.cursor.execute(query)
+        game_tuples = self.cursor.fetchall()
+        game_lists = [list(game_tuple) for game_tuple in game_tuples]
+        return game_lists
+
 
 
 def main():
