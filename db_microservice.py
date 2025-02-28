@@ -86,6 +86,17 @@ class DatabaseManager:
         self.cursor.execute(query, (playerID, result))
         self.connection.commit()
 
+    def get_games(self, playerID):
+        """Received a playerID and returns all games for that player."""
+        query = """
+        SELECT Players.name, Games.result FROM Games
+        INNER JOIN Players ON Games.playerID=Players.playerID
+        WHERE Games.playerID = ?;
+        """
+        self.cursor.execute(query, (playerID,))
+        games = self.cursor.fetchall()
+        return games
+
     def listen(self):
         while True:
             request = self.socket.recv_json()
@@ -108,6 +119,13 @@ class DatabaseManager:
                     self.socket.send_string("Successfully deleted all names.")
                 except:
                     self.socket.send_string("Failed to delete all names.")
+            if request_type == "player":
+                player_id = self.get_player_id(request["name"])
+                if player_id:
+                    print(self.get_games(player_id))
+                else:
+                    print(f"No games found for {request["name"]}.")
+                self.socket.send_string("Query complete.")
 
         self.connection.close()
 
