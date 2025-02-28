@@ -123,10 +123,11 @@ class DatabaseManager:
             if request_type == "player":
                 player_id = self.get_player_id(request["name"])
                 if player_id:
-                    print(self.get_games(player_id))
+                    games = self.get_games(player_id)
+                    response = {"status": "success", "games": games}
                 else:
-                    print(f"No games found for {request["name"]}.")
-                self.socket.send_string("Query complete.")
+                    response = {"status": "failure", "message": f"There were no games found for {request["name"]}."}
+                self.socket.send_json(response)
 
         self.connection.close()
 
