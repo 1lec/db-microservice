@@ -57,6 +57,16 @@ class DatabaseManager:
         self.cursor.execute(query, (name,))
         self.connection.commit()
 
+    def delete_player(self, name):
+        """Receives a string representing the name of a player, and if said name is present in the database,
+        removes the name and all associated game results."""
+        query = """
+        DELETE FROM Players
+        WHERE name=?;
+        """
+        self.cursor.execute(query, (name,))
+        self.connection.commit()
+
     def add_game(self, playerID, result):
         query = """
         INSERT INTO Games (playerID, result) VALUES (
@@ -80,6 +90,9 @@ class DatabaseManager:
                     self.socket.send_string("Result was successfully saved.")
                 except:
                     self.socket.send_string("Failed to save game result.")
+            if request_type == "delete":
+                self.delete_player(request["name"])
+                self.socket.send_string(f"Successfully deleted {request["name"]}.")
 
         self.connection.close()
 
