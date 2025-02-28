@@ -68,6 +68,14 @@ class DatabaseManager:
         self.cursor.execute(query, (name,))
         self.connection.commit()
 
+    def delete_all_players(self):
+        """Deletes all players and their associated game results from the database, essentially clearing the database."""
+        query = """
+        DELETE FROM Players;
+        """
+        self.cursor.execute(query)
+        self.connection.commit()
+
     def add_game(self, playerID, result):
         query = """
         INSERT INTO Games (playerID, result) VALUES (
@@ -94,6 +102,12 @@ class DatabaseManager:
             if request_type == "delete":
                 self.delete_player(request["name"])
                 self.socket.send_string(f"Successfully deleted {request["name"]}.")
+            if request_type == "delete-all":
+                try:
+                    self.delete_all_players()
+                    self.socket.send_string("Successfully deleted all names.")
+                except:
+                    self.socket.send_string("Failed to delete all names.")
 
         self.connection.close()
 
