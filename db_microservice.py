@@ -56,7 +56,11 @@ class DatabaseManager:
                     response = {"status": "failure", "message": f"There were no games found for {request["name"]}."}
                 self.socket.send_json(response)
             if request_type == "all-players":
-                response = self.get_all_games()
+                games = self.get_all_games()
+                if games:
+                    response = {"status": "success", "games": games}
+                else:
+                    response = {"status": "failure", "message": "There were no saved games found."}
                 self.socket.send_json(response)
 
         self.connection.close()
