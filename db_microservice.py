@@ -28,12 +28,14 @@ class DatabaseManager:
         context = zmq.Context()
         socket = context.socket(zmq.REP)
         socket.bind(f"tcp://*:{port}")
+        print(f"Database Microservice is running and is listening on port {port}...")
         return socket
     
     def listen(self):
         """Continuously waits for, then handles requests from the client."""
         while True:
             request = self.socket.recv_json()
+            print("Received request:", request)
             request_type = request["type"]
 
             if request_type == "game":
